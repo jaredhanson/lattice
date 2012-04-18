@@ -16,5 +16,14 @@ function(dom) {
     return dom.fromHTML(html);
   }
   
+  Dib.prototype.hook = function(ctrl, el, events) {
+    for (var prop in events) {
+      // TODO: Parse out event and CSS selector
+      //console.log('prop: ' + prop + ' to: ' + events[prop]);
+      var action = events[prop];
+      el.on(prop, ctrl[action]);
+    }
+  }
+  
   return Dib;
 });
