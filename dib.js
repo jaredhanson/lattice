@@ -2,23 +2,13 @@ define(['anchor/dom'],
 
 function(dom) {
   
-  var engines = {};
-  
-  function Dib(options) {
-    this._id = options.id;
+  function Dib(name, events, target) {
+    this._name = name;
+    this._events = events;
+    this._target = target;
   }
   
-  Dib.engine = function(name, fn) {
-    if (typeof name == 'function') {
-      fn = name;
-      name = 'default';
-    }
-    engines[name] = fn;
-  }
-  
-  Dib.prototype.load = function(ctxt, cb) {
-    // TODO: Implement async rendering with callback.
-    // TODO: Register rendering functions. Don't assume Hogan.
+  Dib.prototype.create = function(options, cb) {
     // TODO: Figure out how to extract variables for binding layer.
     // TODO: Eliminate jQuery dependency.
     
@@ -27,18 +17,45 @@ function(dom) {
     fn = engines[engine];
     if (!fn) { throw new Error("Can't find template engine: " + engine); }
     
-    fn(this._id, ctxt, function(err, str) {
+    var self = this;
+    fn(this._name, options, function(err, str) {
       if (err) { return cb(err) }
       // TODO: May not want to always wrap the string in a DOM node collection.
-      var node = dom.fromHTML(str);
-      cb(err, node);
+      var el = dom.fromHTML(str);
+      self._triggers(el);
+      
+      cb(err, el);
     });
+  }
+  
+  Dib.prototype._triggers = function(el) {
+    var events = this._events;
+    for (var key in events) {
+      // TODO: Break key out into event and selector
+      console.log('trigger key: ' + key);
+      var action = events[key];
+      var ev = key;
+      var handler;
+      
+      if (typeof action == 'function') {
+        console.log('target function');
+        handler = action;
+      } else if (typeof action == 'string') {
+        console.log('target string');
+        handler = this._target[action];
+      } else if (typeof action == 'object') {
+        console.log('target object');
+      }
+      
+      el.on(ev, handler);
+    }
   }
   
   Dib.prototype.hook = function(ctrl, el, events) {
     for (var prop in events) {
       // TODO: Parse out event and CSS selector
       //console.log('prop: ' + prop + ' to: ' + events[prop]);
+      /*
       var fn;
       if (typeof events[prop] == 'function') {
         fn = events[prop];
@@ -48,7 +65,19 @@ function(dom) {
         fn = ctrl[action];
       }
       el.on(prop, fn);
+      */
     }
+  }
+  
+  
+  var engines = {};
+  
+  Dib.engine = function(name, fn) {
+    if (typeof name == 'function') {
+      fn = name;
+      name = 'default';
+    }
+    engines[name] = fn;
   }
   
   return Dib;
