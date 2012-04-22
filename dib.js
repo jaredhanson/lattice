@@ -1,9 +1,25 @@
-define(['anchor/dom'],
+define(['anchor/dom',
+        './lib/dom/render'],
 
-function(dom) {
+function($, Render) {
   
-  function Dib(name, events, target) {
+  $.augment(Render);
+  
+  function Dib(name, element, events, target) {
+    // TODO: Figure out a better way to make this polymorphic.
+    /*
+    if (arguments.length == 3) {
+      target = events;
+      events = element;
+      element = null;
+    }
+    */
+    if (!element) {
+      element = { 'tag': 'div' };
+    }
+    
     this._name = name;
+    this._element = element;
     this._events = events;
     this._target = target;
   }
@@ -16,19 +32,25 @@ function(dom) {
     options = options || {};
     
     // TODO: Figure out how to extract variables for binding layer.
-    // TODO: Eliminate jQuery dependency.
+    // TODO: Implement option to wrap this in a div or not.  Default true.
+    //       Wrapping in a div allows $.html() swaps of content, rather than
+    //       replacing the DOM element.  Is this beneficial?
+    // TODO: Perhaps better - implement an option to unwrap the top element
+    //       in the template, then attach a el.render() function to the DOM
+    //       node.
     
     var engine = options.engine || 'default';
-    var render = engines[engine];
-    if (!render) { throw new Error("Can't find template engine: " + engine) }
+    var compile = engines[engine];
+    if (!compile) { throw new Error("Can't find template engine: " + engine) }
     
     var self = this;
-    render(this._name, options, function(err, str) {
+    compile(this._name, options, function(err, template, render) {
       if (err) { return cb(err) }
-      // TODO: May not want to always wrap the string in a DOM node collection.
-      var el = dom.fromHTML(str);
+      var el = $($.create(self._element['tag'], self._element['attrs']));
+      el._template = template;
+      if (render) { el._render = render };
+      el.render(options);
       self._triggers(el);
-      
       cb(null, el);
     });
   }
