@@ -24,8 +24,12 @@ function($, Render) {
     this._target = target;
   }
   
-  Dib.prototype.create = function(options, cb) {
-    if (typeof options == 'function') {
+  Dib.prototype.create = function(locals, options, cb) {
+    if (typeof locals == 'function') {
+      cb = locals;
+      options = {};
+      locals = null;
+    } else if (typeof options == 'function') {
       cb = options;
       options = {};
     }
@@ -48,8 +52,8 @@ function($, Render) {
       if (err) { return cb(err) }
       var el = $($.create(self._element['tag'], self._element['attrs']));
       el._template = template;
-      if (render) { el._render = render };
-      el.render(options);
+      if (render) { el._render = render }
+      if (locals) { el.render(locals) }
       self._triggers(el);
       cb(null, el);
     });
