@@ -65,8 +65,6 @@ function($, Render) {
         , target = this._target
         , handler;
         
-      // TODO: Scope the element to the selector, if one is specified.
-      
       if (typeof action == 'function') {
         handler = action;
       } else if (typeof action == 'string') {
@@ -76,6 +74,12 @@ function($, Render) {
         target = action.target || target;
         if (!target) { throw new Error("Unspecified target for action: " + action.action) }
         handler = target[action.action].bind(target);
+      }
+      
+      if (selector) {
+        // TODO: Make sure these events are delegated, in case selected elements get replaced.
+        el.find(selector).on(ev, handler);
+        return;
       }
       
       el.on(ev, handler);
