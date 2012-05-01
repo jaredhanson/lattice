@@ -5,6 +5,7 @@ function($, Render) {
   
   $.augment(Render);
   
+  // TODO: Implement support for passing existing element (maybe without name for template?)
   function Dib(name, element, events, target) {
     // TODO: Figure out a better way to make this polymorphic.
     /*
