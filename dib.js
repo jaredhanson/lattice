@@ -15,6 +15,15 @@ function($, Render) {
       element = null;
     }
     */
+    
+    // handle a DOM wrapper instead of a template name
+    // Checking in this way allows use of jQuery wrapped elements
+    if (name.length && name[0].nodeType) {
+      target = events;
+      events = element;
+      element = name;
+    }
+    
     if (!element) {
       element = { 'tag': 'div' };
     }
@@ -44,13 +53,19 @@ function($, Render) {
     //       in the template, then attach a el.render() function to the DOM
     //       node.
     
+    if (this._element.length && this._element[0].nodeType) {
+      var el = this._name;
+      this._triggers(el);
+      return cb(null, el);
+    }
+    
     var engine = options.engine || 'default';
     var compile = engines[engine];
-    if (!compile) { throw new Error("Can't find template engine: " + engine) }
+    if (!compile) throw new Error("Can't find template engine: " + engine)
     
     var self = this;
     compile(this._name, options, function(err, template, render) {
-      if (err) { return cb(err) }
+      if (err) return cb(err)
       var el = $($.create(self._element['tag'], self._element['attrs']));
       el._template = template;
       if (render) { el._render = render }
@@ -84,10 +99,9 @@ function($, Render) {
       if (selector) {
         // TODO: Make sure these events are delegated, in case selected elements get replaced.
         el.find(selector).on(ev, handler);
-        return;
+      } else {
+        el.on(ev, handler);
       }
-      
-      el.on(ev, handler);
     }
   }
   
