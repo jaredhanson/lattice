@@ -36,9 +36,6 @@ function($, Render) {
   
   // TODO: Implement support for creating elements synchronously, returned
   //       immediately rather than via callback.
-  // TODO: Implement support for creating elements via jQuery (if desired),
-  //       rather than Anchor's built-in DOM utility.
-  // TODO: Remove the locals argument here (?).
   Dib.prototype.create = function(locals, options, cb) {
     if (typeof locals == 'function') {
       cb = locals;
@@ -71,7 +68,8 @@ function($, Render) {
     var self = this;
     compile(this._name, options, function(err, template, render) {
       if (err) return cb(err)
-      var el = $($.create(self._element['tag'], self._element['attrs']));
+      var dom = options.$ || $;
+      var el = dom($.create(self._element['tag'], self._element['attrs']));
       el._template = template;
       if (render) { el._render = render }
       if (locals) { el.render(locals) }
@@ -104,6 +102,9 @@ function($, Render) {
       if (selector) {
         // TODO: Make sure these events are delegated, in case selected elements get replaced.
         el.find(selector).on(ev, handler);
+        // TODO: This is the jQuery-delegated signature. Implement support for this in Anchor's
+        //       DOM events.
+        //el.on(ev, selector, handler);
       } else {
         el.on(ev, handler);
       }

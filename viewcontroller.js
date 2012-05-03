@@ -23,15 +23,21 @@ function(clazz, events, Dib) {
     if (this.id) element.attrs['id'] = this.id;
     if (this.className) element.attrs['class'] = this.className;
     
+    var options = {};
+    options.$ = this.domUtility;
+    options.engine = this.templateEngine;
+    
     var self = this;
     var dib = new Dib(this.template, element, this.events, this);
-    dib.create(function(err, el) {
+    var locals = this.ondibload();
+    dib.create(locals, options, function(err, el) {
       self.el = el;
       self.onelcreate();
       cb(null, el);
     });
   }
   
+  ViewController.prototype.ondibload = function() { return null };
   ViewController.prototype.onelcreate = function() {};
   
   return ViewController;
