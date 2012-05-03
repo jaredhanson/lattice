@@ -1,6 +1,10 @@
-define(['./dib'],
-function(Dib) {
-  return {
-    Dib: Dib
-  };
+define(['./dib',
+        './viewcontroller'],
+function(Dib, ViewController) {
+  
+  var exports = {};
+  exports.Dib = Dib;
+  exports.ViewController = ViewController;
+  
+  return exports;
 });

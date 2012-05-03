@@ -34,6 +34,11 @@ function($, Render) {
     this._target = target;
   }
   
+  // TODO: Implement support for creating elements synchronously, returned
+  //       immediately rather than via callback.
+  // TODO: Implement support for creating elements via jQuery (if desired),
+  //       rather than Anchor's built-in DOM utility.
+  // TODO: Remove the locals argument here (?).
   Dib.prototype.create = function(locals, options, cb) {
     if (typeof locals == 'function') {
       cb = locals;
