@@ -57,7 +57,7 @@ function($, Render) {
     
     if (this._element.length && this._element[0].nodeType) {
       var el = this._name;
-      this._connect(el);
+      connect(el, this._events, this._target);
       return cb(null, el);
     }
     
@@ -73,19 +73,19 @@ function($, Render) {
       el._template = template;
       if (render) { el._render = render }
       if (locals) { el.render(locals) }
-      self._connect(el);
+      connect(el, self._events, self._target);
       cb(null, el);
     });
   }
   
-  Dib.prototype._connect = function(el) {
-    var events = this._events;
+  function connect(el, e, t) {
+    var events = e;
     for (var key in events) {
       var parts = key.split(' ')
         , ev = parts[0]
         , selector = parts[1]
         , action = events[key]
-        , target = this._target
+        , target = t
         , handler;
         
       if (typeof action == 'function') {
