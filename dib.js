@@ -60,7 +60,7 @@ function($, Render) {
     
     if (this._element.length && this._element[0].nodeType) {
       var el = this._name;
-      this._triggers(el);
+      this._connect(el);
       return cb(null, el);
     }
     
@@ -75,12 +75,12 @@ function($, Render) {
       el._template = template;
       if (render) { el._render = render }
       if (locals) { el.render(locals) }
-      self._triggers(el);
+      self._connect(el);
       cb(null, el);
     });
   }
   
-  Dib.prototype._triggers = function(el) {
+  Dib.prototype._connect = function(el) {
     var events = this._events;
     for (var key in events) {
       var parts = key.split(' ')

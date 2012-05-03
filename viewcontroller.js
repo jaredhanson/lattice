@@ -15,6 +15,8 @@ function(clazz, events, Dib) {
   ViewController.prototype.view = function(cb) {
     if (this.el) return cb(null, this.el);
     
+    // TODO: Add option for controlling the template engine.
+    
     var element = {};
     element.tag = this.tagName || 'div';
     element.attrs = this.attributes || {};
