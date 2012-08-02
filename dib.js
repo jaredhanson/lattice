@@ -1,51 +1,40 @@
 define(['anchor/dom',
-        './lib/dom/render'],
+        './lib/dom/render',
+        './context'],
 
-function($, Render) {
+function(DOM, Render, context) {
   
-  $.augment(Render);
+  // TODO: Move this to context
+  DOM.augment(Render);
   
-  // TODO: Implement support for passing existing element (maybe without name for template?)
-  function Dib(name, element, events, target) {
-    // TODO: Figure out a better way to make this polymorphic.
-    /*
-    if (arguments.length == 3) {
-      target = events;
-      events = element;
-      element = null;
-    }
-    */
-    
-    // handle a DOM wrapper instead of a template name
-    // Checking in this way allows use of jQuery wrapped elements
-    if (name.length && name[0].nodeType) {
-      target = events;
-      events = element;
-      element = name;
-    }
-    
-    if (!element) {
-      element = { 'tag': 'div' };
-    }
-    
+  // Dib is a DOM interface bundle, with support for declarative markup of
+  // elements and events.
+  function Dib(name) {
     this._name = name;
-    this._element = element;
-    this._events = events;
-    this._target = target;
   }
   
-  // TODO: Implement support for creating elements synchronously, returned
-  //       immediately rather than via callback.
-  Dib.prototype.create = function(locals, options, cb) {
-    if (typeof locals == 'function') {
-      cb = locals;
-      options = {};
-      locals = null;
-    } else if (typeof options == 'function') {
-      cb = options;
-      options = {};
-    }
+  Dib.prototype.container = function(container) {
+    this._container = container;
+    return this;
+  }
+  
+  Dib.prototype.events = function(events, target) {
+    this._events = events;
+    this._target = target;
+    return this;
+  }
+  
+  Dib.prototype.create = function(options) {
     options = options || {};
+    
+    var render = context.render
+      , $ = context.$;
+    
+    // TODO: Return template, or rendered html ???
+    var html = render(this._name, options);
+    
+    // TODO: Handle object results from render
+    // TODO: Handle optino to not wrap the HTML in an element
     
     // TODO: Figure out how to extract variables for binding layer.
     // TODO: Implement option to wrap this in a div or not.  Default true.
@@ -55,28 +44,19 @@ function($, Render) {
     //       in the template, then attach a el.render() function to the DOM
     //       node.
     
-    if (this._element.length && this._element[0].nodeType) {
-      var el = this._name;
-      connect(el, this._events, this._target);
-      return cb(null, el);
-    }
+    var el = $(DOM.create(this._container['tag'], this._container['attrs']));
+    el.html(html)
+    // FIXME: Do we want to save the rendering here?
+    //el._template = template;
+    //if (render) { el._render = render }
+    //if (locals) { el.render(locals) }
+    //connect(el, self._events, self._target);
+    //cb(null, el);
     
-    var engine = options.engine || 'default';
-    var compile = engines[engine];
-    if (!compile) throw new Error("Can't find template engine: " + engine)
-    
-    var self = this;
-    compile(this._name, options, function(err, template, render) {
-      if (err) return cb(err)
-      var dom = options.$ || $;
-      var el = dom($.create(self._element['tag'], self._element['attrs']));
-      el._template = template;
-      if (render) { el._render = render }
-      if (locals) { el.render(locals) }
-      connect(el, self._events, self._target);
-      cb(null, el);
-    });
+    connect(el, this._events, this._target);
+    return el;
   }
+  
   
   function connect(el, e, t) {
     var events = e;
@@ -109,17 +89,6 @@ function($, Render) {
         el.on(ev, handler);
       }
     }
-  }
-  
-  
-  var engines = {};
-  
-  Dib.engine = function(name, fn) {
-    if (typeof name == 'function') {
-      fn = name;
-      name = 'default';
-    }
-    engines[name] = fn;
   }
   
   return Dib;

@@ -12,10 +12,10 @@ function(clazz, events, Dib) {
   // TODO: Implement support for "static" elements that want to rerender
   //       by directly manipulating the DOM.
   
+  // TODO: Rename this to ._init
   ViewController.prototype.view = function(cb) {
-    if (this.el) return cb(null, this.el);
-    
-    // TODO: Add option for controlling the template engine.
+    //if (this.el) return cb(null, this.el);
+    if (this.el) return
     
     var element = {};
     element.tag = this.tagName || 'div';
@@ -23,22 +23,17 @@ function(clazz, events, Dib) {
     if (this.id) element.attrs['id'] = this.id;
     if (this.className) element.attrs['class'] = this.className;
     
-    var options = {};
-    options.$ = this.domUtility;
-    options.engine = this.templateEngine;
+    var dib = new Dib(this.template, null, null, this)
+      , locals = this.willLoadDib();
     
-    var self = this;
-    var dib = new Dib(this.template, element, this.events, this);
-    var locals = this.ondibload();
-    dib.create(locals, options, function(err, el) {
-      self.el = el;
-      self.onelcreate();
-      cb(null, el);
-    });
+    dib.container(element).events(this.events, this);
+    
+    this.el = dib.create(locals);
+    this.didLoadDib();
   }
   
-  ViewController.prototype.ondibload = function() { return null };
-  ViewController.prototype.onelcreate = function() {};
+  ViewController.prototype.willLoadDib = function() {};
+  ViewController.prototype.didLoadDib = function() {};
   
   return ViewController;
 });
