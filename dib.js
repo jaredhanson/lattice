@@ -1,15 +1,13 @@
 define(['anchor/dom',
-        './lib/dom/render',
         './context'],
 
-function(DOM, Render, context) {
-  
-  // TODO: Move this to context
-  DOM.augment(Render);
+function(DOM, context) {
   
   // Dib is a DOM interface bundle, with support for declarative markup of
   // elements and events.
   function Dib(name) {
+    // TODO: Implement ability to pass elements directly (??)
+    
     this._name = name;
   }
   
@@ -44,8 +42,15 @@ function(DOM, Render, context) {
     //       in the template, then attach a el.render() function to the DOM
     //       node.
     
-    var el = $(DOM.create(this._container['tag'], this._container['attrs']));
-    el.html(html)
+    var el;
+    
+    if (this._container) {
+      el = $(DOM.create(this._container['tag'], this._container['attrs']));
+      el.html(html)
+    } else {
+      el = $(html)
+    }
+    
     // FIXME: Do we want to save the rendering here?
     //el._template = template;
     //if (render) { el._render = render }

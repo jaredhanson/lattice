@@ -1,32 +1,32 @@
-define(['anchor/class',
-        'anchor/events',
-        './dib'],
-
-function(clazz, events, Dib) {
+define(['./dib',
+        'anchor/class',
+        'anchor/events'],
+function(Dib, clazz, events) {
   
   function ViewController() {
     events.EventEmitter.call(this);
+    this._init();
   }
   clazz.inherits(ViewController, events.EventEmitter);
   
   // TODO: Implement support for "static" elements that want to rerender
   //       by directly manipulating the DOM.
   
-  // TODO: Rename this to ._init
-  ViewController.prototype.view = function(cb) {
-    //if (this.el) return cb(null, this.el);
-    if (this.el) return
+  ViewController.prototype._init = function() {
+    var dib = new Dib(this.template)
+      , locals = this.willLoadDib()
+      , element;
     
-    var element = {};
-    element.tag = this.tagName || 'div';
-    element.attrs = this.attributes || {};
-    if (this.id) element.attrs['id'] = this.id;
-    if (this.className) element.attrs['class'] = this.className;
+    if (this.tagName || this.className || this.attributes || this.id) {
+      element = {}
+      element.tag = this.tagName || 'div';
+      element.attrs = this.attributes || {};
+      if (this.id) element.attrs['id'] = this.id;
+      if (this.className) element.attrs['class'] = this.className;
+    }
     
-    var dib = new Dib(this.template, null, null, this)
-      , locals = this.willLoadDib();
-    
-    dib.container(element).events(this.events, this);
+    dib.container(element)
+       .events(this.events, this);
     
     this.el = dib.create(locals);
     this.didLoadDib();

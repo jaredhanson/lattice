@@ -1,5 +1,6 @@
-define(['anchor/dom'],
-function(DOM) {
+define(['anchor/dom',
+        './lib/dom/render'],
+function(DOM, Render) {
   var exports = {};
   
   exports.render = function(name, options) {
@@ -24,6 +25,9 @@ function(DOM) {
   }
   
   var wrap = DOM;
+  
+  
+  DOM.augment(Render);
   
   
   // TODO: May want to implement default renderer, with support for mime types
